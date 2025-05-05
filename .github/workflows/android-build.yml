@@ -40,11 +40,6 @@ jobs:
           sed -i '/org.jmailen.kotlinter/d' compat/build.gradle
           sed -i '/org.jmailen.kotlinter/d' core/build.gradle
 
-      - name: Build SDK
-        run: |
-          cd Rocket.Chat.Kotlin.SDK
-          ./gradlew publishToMavenLocal
-
       - name: Clone Android Client
         run: |
           git clone https://github.com/RocketChat/Rocket.Chat.Android.git
