@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Assemble FossDebug APK
+    name: Assemble Debug APK
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +32,7 @@ jobs:
         run: |
           git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
 
-      - name: Patch SDK (убираем ktlint)
+      - name: Patch SDK
         run: |
           cd Rocket.Chat.Kotlin.SDK
           sed -i '/ktlint-html-reporter/d' build.gradle || true
@@ -40,21 +40,25 @@ jobs:
           sed -i '/org.jmailen.kotlinter/d' compat/build.gradle || true
           sed -i '/org.jmailen.kotlinter/d' core/build.gradle || true
 
-      - name: Clone Android Client
+      - name: Clone Android Client to temp folder
         run: |
-          git clone https://github.com/RocketChat/Rocket.Chat.Android.git
-          mv Rocket.Chat.Android/* .
-          rm -rf Rocket.Chat.Android
+          git clone https://github.com/RocketChat/Rocket.Chat.Android.git tmp-client
 
-      - name: Apply custom patches from /patches
+      - name: Move only missing files (skip gradle conflict)
         run: |
-          for f in patches/*.diff; do
-            echo "Applying patch: $f"
-            patch -p1 < "$f" || echo "Patch $f failed but continuing"
+          shopt -s dotglob
+          cp -rn tmp-client/* . || true
+          rm -rf tmp-client
+
+      - name: Apply local patches
+        run: |
+          for patch in patches/*.diff; do
+            echo "Applying $patch"
+            git apply "$patch" || exit 1
           done
 
-      - name: Ensure gradlew is executable
+      - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Assemble APK
+      - name: Build APK
         run: ./gradlew assembleFossDebug --stacktrace --info
