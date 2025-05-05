@@ -42,13 +42,35 @@ jobs:
       - name: Clone Android Client
         run: git clone https://github.com/RocketChat/Rocket.Chat.Android.git
 
-      - name: Copy necessary project files
+      - name: Copy project files
         run: |
           cp -r Rocket.Chat.Android/app ./
           cp Rocket.Chat.Android/gradlew ./
           cp Rocket.Chat.Android/gradlew.bat ./
           cp -r Rocket.Chat.Android/gradle ./
           chmod +x gradlew
+
+      - name: Create top-level build.gradle
+        run: |
+          cat <<EOF > build.gradle
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:3.5.0'
+                  classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.50'
+              }
+          }
+
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          EOF
 
       - name: Patch settings.gradle with required modules
         run: |
@@ -62,8 +84,8 @@ jobs:
 
       - name: Remove gradle-versions-plugin
         run: |
-          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i '/com.github.ben-manes:gradle-versions-plugin/d' {} +
-          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i '/apply plugin: "com.github.ben-manes.versions"/d' {} +
+          find . -type f -name "*.gradle" -exec sed -i '/com.github.ben-manes:gradle-versions-plugin/d' {} +
+          find . -type f -name "*.gradle" -exec sed -i '/apply plugin: "com.github.ben-manes.versions"/d' {} +
 
       - name: Remove broken jitpack dependencies
         run: |
@@ -78,9 +100,9 @@ jobs:
 
       - name: Ensure google() repository present
         run: |
-          find . -type f \( -name "build.gradle" -o -name "settings.gradle" \) -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
+          find . -type f -name "*.gradle" -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
 
-      - name: Remove unresolved kapt/libraries/implementation lines
+      - name: Remove unresolved kapt/libraries lines
         run: |
           for type in implementation api compileOnly testImplementation androidTestImplementation debugImplementation releaseImplementation runtimeOnly; do
             find . -type f -name "*.gradle" -exec sed -i "/$type\s\+\(libs\|libraries\)\./d" {} +
@@ -97,7 +119,3 @@ jobs:
 
       - name: Build APK
         run: ./gradlew assembleDebug --stacktrace --info
-
-      - name: Output APK files
-        if: success()
-        run: find . -type f -name "*.apk"
