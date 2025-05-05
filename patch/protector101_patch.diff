@@ -1,5 +1,4 @@
 diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
-index 1a2b3c4..5d6e7f8 100644
 --- a/app/src/main/res/values/strings.xml
 +++ b/app/src/main/res/values/strings.xml
 @@ -1,5 +1,5 @@
@@ -10,7 +9,6 @@ index 1a2b3c4..5d6e7f8 100644
  </resources>
 
 diff --git a/app/src/main/res/values/colors.xml b/app/src/main/res/values/colors.xml
-index abc1234..def5678 100644
 --- a/app/src/main/res/values/colors.xml
 +++ b/app/src/main/res/values/colors.xml
 @@ -2,7 +2,8 @@
