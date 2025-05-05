@@ -28,9 +28,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build SDK
+      - name: Clone Kotlin SDK
         run: |
           git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
+
+      - name: Patch SDK to skip broken plugin
+        run: |
+          sed -i '/ktlint-html-reporter/d' Rocket.Chat.Kotlin.SDK/build.gradle.kts
+
+      - name: Build SDK
+        run: |
           cd Rocket.Chat.Kotlin.SDK
           ./gradlew publishToMavenLocal
 
@@ -46,12 +53,11 @@ jobs:
           cp custom/* app/src/main/res/drawable/
           cp custom/ic_launcher.png app/src/main/res/mipmap-xxhdpi/
 
-     # - name: Assemble Debug APK
-      #  run: ./gradlew assembleDebug
-#
- #     - name: Upload APK artifact
-  #      uses: actions/upload-artifact@v2
-   #     with:
-    #      name: Protector101-debug-apk
-     #     path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Assemble Debug APK
+        run: ./gradlew assembleDebug
 
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Protector101-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
