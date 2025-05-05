@@ -82,13 +82,16 @@ jobs:
 
       - name: Добавить репозитории и зависимости
         run: |
-          # Добавляем JCenter и MavenCentral репозитории
+          # Добавляем JCenter, MavenCentral и JitPack репозитории
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
 
           # Заменяем зависимость Exoplayer на актуальную версию
           sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
+
+          # Убедимся, что exoplayer доступен
+          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
 
       - name: Debug full build.gradle
         run: |
