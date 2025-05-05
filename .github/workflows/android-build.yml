@@ -42,8 +42,13 @@ jobs:
       - name: Clone Android Client
         run: git clone https://github.com/RocketChat/Rocket.Chat.Android.git
 
-      - name: Copy app folder without breaking structure
-        run: cp -r Rocket.Chat.Android/app ./
+      - name: Copy necessary project files
+        run: |
+          cp -r Rocket.Chat.Android/app ./
+          cp Rocket.Chat.Android/gradlew ./
+          cp Rocket.Chat.Android/gradlew.bat ./
+          cp -r Rocket.Chat.Android/gradle ./
+          chmod +x gradlew
 
       - name: Patch settings.gradle with required modules
         run: |
