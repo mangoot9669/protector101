@@ -29,10 +29,9 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Clone Kotlin SDK
-        run: |
-          git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
+        run: git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
 
-      - name: Patch SDK
+      - name: Patch SDK to skip broken lint plugin
         run: |
           cd Rocket.Chat.Kotlin.SDK
           sed -i '/ktlint-html-reporter/d' build.gradle || true
@@ -40,25 +39,40 @@ jobs:
           sed -i '/org.jmailen.kotlinter/d' compat/build.gradle || true
           sed -i '/org.jmailen.kotlinter/d' core/build.gradle || true
 
-      - name: Clone Android Client to temp folder
+      - name: Clone Android Client
         run: |
-          git clone https://github.com/RocketChat/Rocket.Chat.Android.git tmp-client
-
-      - name: Move only missing files (skip gradle conflict)
-        run: |
+          git clone https://github.com/RocketChat/Rocket.Chat.Android.git temp-client
           shopt -s dotglob
-          cp -rn tmp-client/* . || true
-          rm -rf tmp-client
+          mv temp-client/* .
+          rm -rf temp-client
 
-      - name: Apply local patches
+      - name: Apply .diff patches if exist
         run: |
-          for patch in patches/*.diff; do
-            echo "Applying $patch"
-            git apply "$patch" || exit 1
-          done
+          if ls patches/*.diff 1> /dev/null 2>&1; then
+            for patch in patches/*.diff; do
+              echo "Applying $patch"
+              patch -p1 < "$patch"
+            done
+          else
+            echo "No patches to apply."
+          fi
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Add repositories and update ExoPlayer in app
+        run: |
+          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle || true
+          sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle || true
+          sed -i '/repositories {/a \ \ \ \ google()' app/build.gradle || true
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/g' app/build.gradle || true
+          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/g' app/build.gradle || true
 
-      - name: Build APK
-        run: ./gradlew assembleFossDebug --stacktrace --info
+      - name: Add repositories and update ExoPlayer in player
+        run: |
+          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' player/build.gradle || true
+          sed -i '/repositories {/a \ \ \ \ mavenCentral()' player/build.gradle || true
+          sed -i '/repositories {/a \ \ \ \ google()' player/build.gradle || true
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/g' player/build.gradle || true
+
+      - name: Make gradlew executable and assemble debug APK
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleFossDebug --stacktrace --info
