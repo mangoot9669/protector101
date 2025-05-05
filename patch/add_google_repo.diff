@@ -1,0 +1,10 @@
+--- a/build.gradle
++++ b/build.gradle
+@@
+ allprojects {
+     repositories {
++        google()
+         mavenCentral()
+         maven { url 'https://jitpack.io' }
+     }
+ }
