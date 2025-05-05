@@ -52,9 +52,14 @@ jobs:
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
 
-      - name: Replace all mentions of ExoPlayer 2.8.2 with 2.14.1
+      - name: Replace ExoPlayer version dynamically
         run: |
-          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/g' **/build.gradle
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
+          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
+
+      - name: Replace Flexbox version dynamically
+        run: |
+          sed -i 's/com.google.android:flexbox:1.1.0/com.google.android:flexbox:3.0.0/' app/build.gradle
 
       - name: Add repositories for dependencies
         run: |
