@@ -52,27 +52,20 @@ jobs:
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
 
-      - name: Add JitPack to repositories
+      - name: Add repositories and dependencies
         run: |
-          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' build.gradle
+          # Add required repositories
+          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
 
-      - name: Set compileSdkVersion 29 if missing
-        run: |
-          sed -i 's/android {/android {\n    compileSdkVersion 29/' app/build.gradle
+          # Update exoplayer version
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
 
-      - name: Copy resources
-        run: |
-          cp custom/* app/src/main/res/drawable/
-          cp custom/ic_launcher.png app/src/main/res/mipmap-xxhdpi/
+          # Ensure exoplayer is correctly added
+          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
 
-      - name: Override configs manually
-        run: |
-          cp patch/strings.xml app/src/main/res/values/strings.xml
-          cp patch/colors.xml app/src/main/res/values/colors.xml
-
-      - name: Удалить проблемные библиотеки
+      - name: Remove problematic libraries
         run: |
           sed -i '/libraries.flexbox/d' app/build.gradle
           sed -i '/libraries.livedataKtx/d' app/build.gradle
@@ -80,30 +73,5 @@ jobs:
           sed -i '/libraries.aVLoadingIndicatorView/d' app/build.gradle
           sed -i '/libraries.frescoImageViewer/d' app/build.gradle
 
-      - name: Добавить репозитории и зависимости
-        run: |
-          # Добавляем JCenter, MavenCentral и JitPack репозитории
-          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
-
-          # Заменяем зависимость Exoplayer на актуальную версию
-          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
-
-          # Убедимся, что exoplayer доступен
-          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
-
-      - name: Debug full build.gradle
-        run: |
-          echo "===== BEGIN app/build.gradle ====="
-          cat app/build.gradle
-          echo "===== END app/build.gradle ====="
-
       - name: Assemble Debug APK
         run: ./gradlew assembleDebug
-
-      # - name: Upload APK artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Protector101-debug-apk
-      #     path: app/build/outputs/apk/debug/app-debug.apk
