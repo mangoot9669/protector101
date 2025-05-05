@@ -61,29 +61,21 @@ jobs:
         run: |
           sed -i 's/android {/android {\n    compileSdkVersion 29/' app/build.gradle
 
-      - name: Remove problematic dependencies (via sed exact)
+      - name: Copy resources
         run: |
-          sed -i 's|implementation "com.google.android:flexbox:1.1.0"||' app/build.gradle
-          sed -i 's|implementation "com.shopify:livedata-ktx:2.0.1"||' app/build.gradle
-          sed -i 's|implementation "com.wang.avi:library:2.1.3"||' app/build.gradle
-          sed -i 's|implementation "jp.wasabeef:glide-transformations:4.0.0"||' app/build.gradle
-          sed -i 's|implementation "me.relex:photodraweeview:1.1.0"||' app/build.gradle
+          cp custom/* app/src/main/res/drawable/
+          cp custom/ic_launcher.png app/src/main/res/mipmap-xxhdpi/
 
       - name: Override configs manually
         run: |
           cp patch/strings.xml app/src/main/res/values/strings.xml
           cp patch/colors.xml app/src/main/res/values/colors.xml
 
-      - name: Copy resources
+      - name: Debug full build.gradle
         run: |
-          cp custom/* app/src/main/res/drawable/
-          cp custom/ic_launcher.png app/src/main/res/mipmap-xxhdpi/
-
-      - name: Debug dependencies (optional)
-        run: |
-          echo "------ DEPENDENCIES IN APP/BUILD.GRADLE -------"
-          grep implementation app/build.gradle || true
-          echo "------------------------------------------------"
+          echo "===== BEGIN app/build.gradle ====="
+          cat app/build.gradle
+          echo "===== END app/build.gradle ====="
 
       - name: Assemble Debug APK
         run: ./gradlew assembleDebug
