@@ -51,6 +51,11 @@ jobs:
           sed -i '/com.github.ben-manes:gradle-versions-plugin/d' build.gradle
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
 
+      - name: Fix app/build.gradle
+        run: |
+          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
+          sed -i 's/android {/android {\n    compileSdkVersion 29/' app/build.gradle
+
       - name: Override configs manually
         run: |
           cp patch/strings.xml app/src/main/res/values/strings.xml
