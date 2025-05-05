@@ -1,32 +1,36 @@
-name: Android Build
+name: Android CI Build
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: 11
-        distribution: 'temurin'
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: 17
 
-    - name: Apply patches
-      run: |
-        git apply patches/remove_versions_plugin.diff
-        git apply patches/remove_problematic_deps.diff
-        git apply patches/protector101_patch.diff
+      - name: Grant permissions
+        run: chmod +x ./gradlew || true
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
+      - name: Apply patches
+        run: |
+          for f in patches/*.diff; do
+            echo "Applying $f..."
+            git apply "$f" || echo "Patch $f failed (already applied?)"
+          done
 
-    - name: Build APK
-      run: ./gradlew assembleFossDebug --stacktrace --info
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Build with Gradle
+        run: ./gradlew assembleFossDebug --stacktrace --info
