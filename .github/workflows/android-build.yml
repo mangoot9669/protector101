@@ -56,6 +56,11 @@ jobs:
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
           sed -i 's/android {/android {\n    compileSdkVersion 29/' app/build.gradle
 
+      - name: Add JitPack to repositories
+        run: |
+          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' build.gradle
+          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
+
       - name: Override configs manually
         run: |
           cp patch/strings.xml app/src/main/res/values/strings.xml
