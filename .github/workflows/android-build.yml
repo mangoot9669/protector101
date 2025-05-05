@@ -71,6 +71,14 @@ jobs:
           cp patch/strings.xml app/src/main/res/values/strings.xml
           cp patch/colors.xml app/src/main/res/values/colors.xml
 
+      - name: Удалить проблемные библиотеки
+        run: |
+          sed -i '/libraries.flexbox/d' app/build.gradle
+          sed -i '/libraries.livedataKtx/d' app/build.gradle
+          sed -i '/libraries.glideTransformations/d' app/build.gradle
+          sed -i '/libraries.aVLoadingIndicatorView/d' app/build.gradle
+          sed -i '/libraries.frescoImageViewer/d' app/build.gradle
+
       - name: Debug full build.gradle
         run: |
           echo "===== BEGIN app/build.gradle ====="
