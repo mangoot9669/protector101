@@ -72,12 +72,13 @@ jobs:
 
       - name: Debug: show broken dependencies
         run: |
+          echo "Checking for broken dependencies with null or \$var..."
           grep -rE 'implementation[[:space:]]+(null|[^"]*\$[^"]+)' . || true
 
       - name: Remove unresolved dependency lines
         run: |
           find . -type f -name "*.gradle" \
-            -exec sed -i '/implementation[ ]\+\(null\|""\|\$[a-zA-Z_]\+\)/d' {} +
+            -exec sed -i -E '/implementation[ ]+(null|""|\$[a-zA-Z_]+)/d' {} +
 
       - name: Clean Gradle build cache
         run: ./gradlew cleanBuildCache || true
