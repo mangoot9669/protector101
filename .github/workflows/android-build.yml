@@ -37,6 +37,7 @@ jobs:
           cd Rocket.Chat.Kotlin.SDK
           sed -i '/ktlint-html-reporter/d' build.gradle
           sed -i '/kotlinter-gradle/d' build.gradle
+          sed -i '/org.jmailen.kotlinter/d' compat/build.gradle
 
       - name: Build SDK
         run: |
