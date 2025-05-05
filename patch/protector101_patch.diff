@@ -1,1 +1,24 @@
-# Здесь должен быть patch — можно заменить на реальный позже.
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 1a2b3c4..5d6e7f8 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -1,5 +1,5 @@
+ <resources>
+-    <string name="app_name">Rocket.Chat</string>
++    <string name="app_name">Протектор 101</string>
+     <!-- другие строки остаются без изменений -->
+ </resources>
+
+diff --git a/app/src/main/res/values/colors.xml b/app/src/main/res/values/colors.xml
+index abc1234..def5678 100644
+--- a/app/src/main/res/values/colors.xml
++++ b/app/src/main/res/values/colors.xml
+@@ -2,7 +2,8 @@
+ <resources>
+-    <color name="colorPrimary">#3F51B5</color>
+-    <color name="colorPrimaryDark">#303F9F</color>
+-    <color name="colorAccent">#FF4081</color>
++    <color name="colorPrimary">#4B5320</color>
++    <color name="colorPrimaryDark">#3B4220</color>
++    <color name="colorAccent">#A9B000</color>
+ </resources>
