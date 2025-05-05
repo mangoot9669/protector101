@@ -70,9 +70,15 @@ jobs:
           find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" -o -name "settings.gradle" -o -name "settings.gradle.kts" \) \
           -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
 
-      - name: Remove corrupted null dependencies
+      - name: Debug: show broken dependencies
         run: |
-          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i '/null/d' {} +
+          echo "⚠️ Внимание: найденные зависимости с переменными или null:"
+          grep -rE 'implementation\s+(null|[^"]*\$[^"]+)' . || true
+
+      - name: Remove unresolved dependency lines
+        run: |
+          find . -type f -name "*.gradle" \
+            -exec sed -i '/implementation\s\+\(null\|""\|\$[a-zA-Z_]\+\)/d' {} +
 
       - name: Clean Gradle build cache
         run: ./gradlew cleanBuildCache || true
