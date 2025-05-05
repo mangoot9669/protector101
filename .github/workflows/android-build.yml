@@ -35,10 +35,10 @@ jobs:
       - name: Patch SDK to skip broken lint plugin
         run: |
           cd Rocket.Chat.Kotlin.SDK
-          sed -i '/ktlint-html-reporter/d' build.gradle
-          sed -i '/kotlinter-gradle/d' build.gradle
-          sed -i '/org.jmailen.kotlinter/d' compat/build.gradle
-          sed -i '/org.jmailen.kotlinter/d' core/build.gradle
+          sed -i '/ktlint-html-reporter/d' build.gradle || true
+          sed -i '/kotlinter-gradle/d' build.gradle || true
+          sed -i '/org.jmailen.kotlinter/d' compat/build.gradle || true
+          sed -i '/org.jmailen.kotlinter/d' core/build.gradle || true
 
       - name: Clone Android Client
         run: |
@@ -48,41 +48,26 @@ jobs:
 
       - name: Remove gradle-versions-plugin
         run: |
-          sed -i '/com.github.ben-manes:gradle-versions-plugin/d' build.gradle
-          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
-          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
+          sed -i '/com.github.ben-manes:gradle-versions-plugin/d' build.gradle || true
+          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle || true
+          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle || true
 
-      - name: Add repositories and dependencies
+      - name: Add repositories and update ExoPlayer in app
         run: |
-          # Add required repositories
-          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ google()' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle || true
+          sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle || true
+          sed -i '/repositories {/a \ \ \ \ google()' app/build.gradle || true
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/g' app/build.gradle || true
+          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/g' app/build.gradle || true
 
-          # Update exoplayer version
-          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
-          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
-
-      - name: Remove problematic libraries
+      - name: Add repositories and update ExoPlayer in player
         run: |
-          sed -i '/libraries.flexbox/d' app/build.gradle
-          sed -i '/libraries.livedataKtx/d' app/build.gradle
-          sed -i '/libraries.glideTransformations/d' app/build.gradle
-          sed -i '/libraries.aVLoadingIndicatorView/d' app/build.gradle
-          sed -i '/libraries.frescoImageViewer/d' app/build.gradle
-
-      - name: Patch Android SDK configuration
-        run: |
-          sed -i '/^android\s*{.*/a \
-              compileSdkVersion 29\n\
-              defaultConfig {\n\
-                  minSdkVersion 21\n\
-                  targetSdkVersion 29\n\
-              }' app/build.gradle
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' player/build.gradle || true
+          sed -i '/repositories {/a \ \ \ \ mavenCentral()' player/build.gradle || true
+          sed -i '/repositories {/a \ \ \ \ google()' player/build.gradle || true
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/g' player/build.gradle || true
 
       - name: Assemble Debug APK
-        run: ./gradlew assembleDebug --stacktrace --info
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --stacktrace --info
