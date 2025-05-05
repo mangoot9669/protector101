@@ -46,9 +46,11 @@ jobs:
           mv Rocket.Chat.Android/* .
           rm -rf Rocket.Chat.Android
 
-      - name: Apply patch and copy resources
+      - name: Apply patch
+        run: git apply patch/protector101_patch.diff
+
+      - name: Copy resources
         run: |
-          git apply patch/protector101_patch.diff
           cp custom/* app/src/main/res/drawable/
           cp custom/ic_launcher.png app/src/main/res/mipmap-xxhdpi/
 
