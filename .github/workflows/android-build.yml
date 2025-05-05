@@ -64,7 +64,6 @@ jobs:
 
       - name: Add repositories for dependencies
         run: |
-          # Добавляем необходимые репозитории
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
@@ -78,4 +77,4 @@ jobs:
 
       - name: Assemble Debug APK
         run: |
-          ./gradlew assembleDebug --stacktrace --info  # Выводим подробную информацию для отладки
+          ./gradlew assembleDebug --stacktrace --info
