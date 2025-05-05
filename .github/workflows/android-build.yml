@@ -87,8 +87,8 @@ jobs:
           sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
 
-          # Добавляем зависимость Exoplayer
-          sed -i '/dependencies {/a \ \ \ \ implementation "com.google.android.exoplayer:exoplayer:2.8.2"' app/build.gradle
+          # Заменяем зависимость Exoplayer на актуальную версию
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
 
       - name: Debug full build.gradle
         run: |
