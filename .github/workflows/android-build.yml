@@ -46,12 +46,12 @@ jobs:
           cp custom/* app/src/main/res/drawable/
           cp custom/ic_launcher.png app/src/main/res/mipmap-xxhdpi/
 
-      - name: Assemble Debug APK
-        run: ./gradlew assembleDebug
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: Protector101-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+     # - name: Assemble Debug APK
+      #  run: ./gradlew assembleDebug
+#
+ #     - name: Upload APK artifact
+  #      uses: actions/upload-artifact@v2
+   #     with:
+    #      name: Protector101-debug-apk
+     #     path: app/build/outputs/apk/debug/app-debug.apk
 
