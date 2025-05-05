@@ -55,7 +55,8 @@ jobs:
       - name: Add JitPack to repositories
         run: |
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' build.gradle
-          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
 
       - name: Set compileSdkVersion 29 if missing
         run: |
@@ -78,6 +79,16 @@ jobs:
           sed -i '/libraries.glideTransformations/d' app/build.gradle
           sed -i '/libraries.aVLoadingIndicatorView/d' app/build.gradle
           sed -i '/libraries.frescoImageViewer/d' app/build.gradle
+
+      - name: Добавить репозитории и зависимости
+        run: |
+          # Добавляем JCenter и MavenCentral репозитории
+          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
+
+          # Добавляем зависимость Exoplayer
+          sed -i '/dependencies {/a \ \ \ \ implementation "com.google.android.exoplayer:exoplayer:2.8.2"' app/build.gradle
 
       - name: Debug full build.gradle
         run: |
