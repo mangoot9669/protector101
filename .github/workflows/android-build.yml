@@ -13,24 +13,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup JDK
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: 17
 
-      - name: Grant permissions
-        run: chmod +x ./gradlew || true
-
       - name: Apply patches
         run: |
           for f in patches/*.diff; do
-            echo "Applying $f..."
-            git apply "$f" || echo "Patch $f failed (already applied?)"
+            echo "Applying $f"
+            git apply "$f" || echo "Patch $f failed (maybe already applied)"
           done
 
-      - name: Setup Gradle
+      - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: Build with Gradle
-        run: ./gradlew assembleFossDebug --stacktrace --info
+      - name: Build with Gradle (system-installed)
+        run: gradle assembleFossDebug --stacktrace --info
