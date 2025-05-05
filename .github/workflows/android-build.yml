@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Assemble Debug APK
+    name: Assemble APK
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +24,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
-          key: "${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}"
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
@@ -32,7 +32,7 @@ jobs:
         run: |
           git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
 
-      - name: Apply SDK patch
+      - name: Patch SDK to skip broken lint plugin
         run: |
           cd Rocket.Chat.Kotlin.SDK
           sed -i '/ktlint-html-reporter/d' build.gradle || true
@@ -40,27 +40,31 @@ jobs:
           sed -i '/org.jmailen.kotlinter/d' compat/build.gradle || true
           sed -i '/org.jmailen.kotlinter/d' core/build.gradle || true
 
-      - name: Clone Rocket.Chat.Android safely
+      - name: Clone Android Client to temp
         run: |
           git clone https://github.com/RocketChat/Rocket.Chat.Android.git temp-client
-          shopt -s dotglob
-          for d in temp-client/*; do
-            fname="$(basename "$d")"
-            if [ ! -e "$fname" ]; then
-              mv "$d" .
-            fi
-          done
-          rm -rf temp-client
 
-      - name: Apply all patches
+      - name: Move Android Client safely
         run: |
-          for patch in patches/*.diff; do
-            echo "Applying $patch"
-            git apply "$patch"
-          done
+          shopt -s dotglob
+          mv temp-client/app ./app
+          mv temp-client/build.gradle ./build.gradle
+          mv temp-client/gradle.properties ./gradle.properties
+          mv temp-client/gradlew ./gradlew
+          mv temp-client/gradlew.bat ./gradlew.bat
+          mv temp-client/settings.gradle ./settings.gradle
+          mv temp-client/gradle ./gradle
+          rm -rf temp-client
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build APK
+      - name: Apply patches from patch/
+        run: |
+          echo "Applying patch/*.diff"
+          for patch in patch/*.diff; do
+            git apply "$patch"
+          done
+
+      - name: Assemble APK
         run: ./gradlew assembleFossDebug --stacktrace --info
