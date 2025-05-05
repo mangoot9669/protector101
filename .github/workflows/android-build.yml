@@ -61,6 +61,9 @@ jobs:
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' build.gradle
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
 
+      - name: Remove problematic dependencies
+        run: git apply patch/remove_problematic_deps.diff
+
       - name: Override configs manually
         run: |
           cp patch/strings.xml app/src/main/res/values/strings.xml
