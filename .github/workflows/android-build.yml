@@ -43,30 +43,25 @@ jobs:
       - name: Clone Android Client
         run: |
           git clone https://github.com/RocketChat/Rocket.Chat.Android.git
-          mv Rocket.Chat.Android/* .  # Перемещаем содержимое в основной каталог
+          mv Rocket.Chat.Android/* . 
           rm -rf Rocket.Chat.Android
 
       - name: Remove gradle-versions-plugin
         run: |
-          sed -i '/com.github.ben-manes:gradle-versions-plugin/d' build.gradle
-          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
-          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
+          find . -name "build.gradle" -exec sed -i '/com.github.ben-manes:gradle-versions-plugin/d' {} +
+          find . -name "build.gradle" -exec sed -i '/apply plugin: "com.github.ben-manes.versions"/d' {} +
 
-      - name: Replace ExoPlayer version dynamically
+      - name: Replace ExoPlayer version everywhere
         run: |
-          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
-          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
+          find . -name "build.gradle" -exec sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/g' {} +
 
-      - name: Replace Flexbox version dynamically
+      - name: Replace Flexbox version everywhere
         run: |
-          sed -i 's/com.google.android:flexbox:1.1.0/com.google.android:flexbox:3.0.0/' app/build.gradle
+          find . -name "build.gradle" -exec sed -i 's/com.google.android:flexbox:1.1.0/com.google.android:flexbox:3.0.0/g' {} +
 
-      - name: Add repositories for dependencies
+      - name: Add repositories to all build.gradle
         run: |
-          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ google()' app/build.gradle
+          find . -name "build.gradle" -exec sed -i '/repositories {/a \ \ \ \ google()\n    mavenCentral()\n    jcenter()\n    maven { url "https://jitpack.io" }' {} +
 
       - name: Clean Gradle build cache
         run: ./gradlew cleanBuildCache
@@ -75,5 +70,4 @@ jobs:
         run: ./gradlew clean
 
       - name: Assemble Debug APK
-        run: |
-          ./gradlew assembleDebug --stacktrace --info
+        run: ./gradlew assembleDebug --stacktrace --info
