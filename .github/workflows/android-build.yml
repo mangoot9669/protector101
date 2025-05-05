@@ -70,11 +70,13 @@ jobs:
           find . -type f \( -name "build.gradle" -o -name "settings.gradle" \) \
           -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
 
-      - name: 🔥 Remove unresolved dependencies (libs., libraries., and unbound variables)
+      - name: 🔥 Remove unresolved dependencies (libs., libraries., kapt)
         run: |
           for type in implementation api compileOnly testImplementation androidTestImplementation debugImplementation releaseImplementation runtimeOnly; do
             find . -type f -name "*.gradle" -exec sed -i "/$type\s\+\(libs\|libraries\)\./d" {} +
           done
+          find . -type f -name "*.gradle" -exec sed -i '/implementation\s*(libraries\./d' {} +
+          find . -type f -name "*.gradle" -exec sed -i '/kapt\s\+libraries\./d' {} +
           find . -type f -name "*.gradle" -exec sed -i '/implementation\s\+[a-zA-Z_][a-zA-Z0-9_]*$/d' {} +
 
       - name: 🪵 Print dependencies block (debug)
