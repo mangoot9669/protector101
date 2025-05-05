@@ -29,93 +29,60 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Clone Kotlin SDK
-        run: git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
+        run: |
+          git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
 
       - name: Patch SDK to skip broken lint plugin
         run: |
           cd Rocket.Chat.Kotlin.SDK
-          sed -i '/ktlint-html-reporter/d' build.gradle || true
-          sed -i '/kotlinter-gradle/d' build.gradle || true
-          sed -i '/org.jmailen.kotlinter/d' compat/build.gradle || true
-          sed -i '/org.jmailen.kotlinter/d' core/build.gradle || true
+          sed -i '/ktlint-html-reporter/d' build.gradle
+          sed -i '/kotlinter-gradle/d' build.gradle
+          sed -i '/org.jmailen.kotlinter/d' compat/build.gradle
+          sed -i '/org.jmailen.kotlinter/d' core/build.gradle
 
       - name: Clone Android Client
-        run: git clone https://github.com/RocketChat/Rocket.Chat.Android.git
-
-      - name: Copy project files
         run: |
-          cp -r Rocket.Chat.Android/app ./
-          cp Rocket.Chat.Android/gradlew ./
-          cp Rocket.Chat.Android/gradlew.bat ./
-          cp -r Rocket.Chat.Android/gradle ./
-          chmod +x gradlew
-
-      - name: Create top-level build.gradle
-        run: |
-          cat <<EOF > build.gradle
-          buildscript {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-              dependencies {
-                  classpath 'com.android.tools.build:gradle:3.5.0'
-                  classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.50'
-              }
-          }
-
-          allprojects {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          EOF
-
-      - name: Patch settings.gradle with required modules
-        run: |
-          echo "include ':app', ':core', ':player', ':emoji', ':util', ':suggestions', ':draw'" > settings.gradle
-          echo "project(':core').projectDir = file('Rocket.Chat.Kotlin.SDK/core')" >> settings.gradle
-          echo "project(':player').projectDir = file('Rocket.Chat.Kotlin.SDK/player')" >> settings.gradle
-          echo "project(':emoji').projectDir = file('Rocket.Chat.Kotlin.SDK/emoji')" >> settings.gradle
-          echo "project(':util').projectDir = file('Rocket.Chat.Kotlin.SDK/util')" >> settings.gradle
-          echo "project(':suggestions').projectDir = file('Rocket.Chat.Kotlin.SDK/suggestions')" >> settings.gradle
-          echo "project(':draw').projectDir = file('Rocket.Chat.Kotlin.SDK/draw')" >> settings.gradle
+          git clone https://github.com/RocketChat/Rocket.Chat.Android.git
+          mv Rocket.Chat.Android/* .
+          rm -rf Rocket.Chat.Android
 
       - name: Remove gradle-versions-plugin
         run: |
-          find . -type f -name "*.gradle" -exec sed -i '/com.github.ben-manes:gradle-versions-plugin/d' {} +
-          find . -type f -name "*.gradle" -exec sed -i '/apply plugin: "com.github.ben-manes.versions"/d' {} +
+          sed -i '/com.github.ben-manes:gradle-versions-plugin/d' build.gradle
+          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
+          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
 
-      - name: Remove broken jitpack dependencies
+      - name: Add repositories and dependencies
         run: |
-          find . -type f -name "*.gradle" -exec sed -i '/wang.avi/d' {} +
-          find . -type f -name "*.gradle" -exec sed -i '/jitsi-meet-sdk/d' {} +
-          find . -type f -name "*.gradle" -exec sed -i '/jitpack.io/d' {} +
+          # Add required repositories
+          sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ google()' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
 
-      - name: Patch flexbox and exoplayer
+          # Update exoplayer version
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
+          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
+
+      - name: Remove problematic libraries
         run: |
-          find . -type f -name "*.gradle" -exec sed -i 's/com.google.android:flexbox:[^"]\+/com.google.android:flexbox:1.1.0/g' {} +
-          find . -type f -name "*.gradle" -exec sed -i 's/com.google.android.exoplayer:exoplayer:[^"]\+/com.google.android.exoplayer:exoplayer:2.14.1/g' {} +
+          sed -i '/libraries.flexbox/d' app/build.gradle
+          sed -i '/libraries.livedataKtx/d' app/build.gradle
+          sed -i '/libraries.glideTransformations/d' app/build.gradle
+          sed -i '/libraries.aVLoadingIndicatorView/d' app/build.gradle
+          sed -i '/libraries.frescoImageViewer/d' app/build.gradle
 
-      - name: Ensure google() repository present
+      - name: Patch Android SDK configuration
         run: |
-          find . -type f -name "*.gradle" -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
+          sed -i '/^android\s*{.*/a \
+              compileSdkVersion 29\n\
+              defaultConfig {\n\
+                  minSdkVersion 21\n\
+                  targetSdkVersion 29\n\
+              }' app/build.gradle
 
-      - name: Remove unresolved kapt/libraries lines
-        run: |
-          for type in implementation api compileOnly testImplementation androidTestImplementation debugImplementation releaseImplementation runtimeOnly; do
-            find . -type f -name "*.gradle" -exec sed -i "/$type\s\+\(libs\|libraries\)\./d" {} +
-          done
-          find . -type f -name "*.gradle" -exec sed -i '/kapt\s\+libraries\./d' {} +
-          find . -type f -name "*.gradle" -exec sed -i '/implementation\s\+[a-zA-Z_][a-zA-Z0-9_]*$/d' {} +
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
-      - name: Disable crashing TODO() in Kotlin
-        run: |
-          find . -type f -name "*.kt" -exec sed -i 's/TODO("not implemented")/\/\/ TODO("not implemented")/' {} +
-
-      - name: Clean Gradle
-        run: ./gradlew cleanBuildCache clean || true
-
-      - name: Build APK
+      - name: Assemble Debug APK
         run: ./gradlew assembleDebug --stacktrace --info
