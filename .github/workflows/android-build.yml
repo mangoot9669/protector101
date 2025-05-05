@@ -61,8 +61,13 @@ jobs:
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' build.gradle
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
 
-      - name: Remove problematic dependencies
-        run: git apply patch/remove_problematic_deps.diff
+      - name: Remove problematic dependencies (via sed)
+        run: |
+          sed -i '/flexbox:1.1.0/d' app/build.gradle
+          sed -i '/livedata-ktx:2.0.1/d' app/build.gradle
+          sed -i '/wang.avi:library/d' app/build.gradle
+          sed -i '/glide-transformations:4.0.0/d' app/build.gradle
+          sed -i '/photodraweeview:1.1.0/d' app/build.gradle
 
       - name: Override configs manually
         run: |
