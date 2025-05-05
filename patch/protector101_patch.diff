@@ -1,22 +1,26 @@
-diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
---- a/app/src/main/res/values/strings.xml
-+++ b/app/src/main/res/values/strings.xml
-@@ -1,5 +1,5 @@
- <resources>
--    <string name="app_name">Rocket.Chat</string>
-+    <string name="app_name">Протектор 101</string>
-     <!-- другие строки остаются без изменений -->
- </resources>
-
 diff --git a/app/src/main/res/values/colors.xml b/app/src/main/res/values/colors.xml
+index 6ef1ed2..cb09b5e 100644
 --- a/app/src/main/res/values/colors.xml
 +++ b/app/src/main/res/values/colors.xml
-@@ -2,7 +2,8 @@
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?>
  <resources>
--    <color name="colorPrimary">#3F51B5</color>
--    <color name="colorPrimaryDark">#303F9F</color>
--    <color name="colorAccent">#FF4081</color>
-+    <color name="colorPrimary">#4B5320</color>
-+    <color name="colorPrimaryDark">#3B4220</color>
-+    <color name="colorAccent">#A9B000</color>
+-    <color name="colorPrimary">#4B5320</color>
+-    <color name="colorPrimaryDark">#3B4220</color>
+-    <color name="colorAccent">#A9B000</color>
++    <color name="colorPrimary">#3F51B5</color>
++    <color name="colorPrimaryDark">#303F9F</color>
++    <color name="colorAccent">#FF4081</color>
  </resources>
+\ No newline at end of file
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 3deb83c..778672b 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -1,4 +1,4 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <resources>
+-    <string name="app_name">Протектор 101</string>
++    <string name="app_name">Rocket.Chat</string>
+ </resources>
+\ No newline at end of file
