@@ -48,23 +48,22 @@ jobs:
 
       - name: Remove gradle-versions-plugin
         run: |
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i '/com.github.ben-manes:gradle-versions-plugin/d' {} +
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i '/apply plugin: "com.github.ben-manes.versions"/d' {} +
+          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i '/com.github.ben-manes:gradle-versions-plugin/d' {} +
+          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i '/apply plugin: "com.github.ben-manes.versions"/d' {} +
 
-      - name: Replace literal version numbers (flexbox)
+      - name: Revert flexbox version to 1.1.0
         run: |
-          grep -rl 'flexbox.*1.1.0' . | xargs sed -i 's/1.1.0/2.0.1/g' || true
-          grep -rl 'flexbox.*3.0.0' . | xargs sed -i 's/3.0.0/2.0.1/g' || true
+          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i 's/com.google.android:flexbox:2.0.1/com.google.android:flexbox:1.1.0/g' {} +
+          grep -rl 'flexbox.*2.0.1' . | xargs sed -i 's/2.0.1/1.1.0/g' || true
 
-      - name: Replace dependencies in gradle files
+      - name: Replace ExoPlayer version
         run: |
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/com.google.android:flexbox:1.1.0/com.google.android:flexbox:2.0.1/g' {} +
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/com.google.android:flexbox:3.0.0/com.google.android:flexbox:2.0.1/g' {} +
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/g' {} +
+          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/g' {} +
 
-      - name: Add repositories to all gradle files
+      - name: Add google() repository to all gradle files
         run: |
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i '/repositories {/a \ \ \ \ google()\n    mavenCentral()\n    jcenter()\n    maven { url("https://jitpack.io") }' {} +
+          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" -o -name "settings.gradle" -o -name "settings.gradle.kts" \) \
+          -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
 
       - name: Clean Gradle build cache
         run: ./gradlew cleanBuildCache || true
