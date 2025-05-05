@@ -46,8 +46,10 @@ jobs:
           mv Rocket.Chat.Android/* .
           rm -rf Rocket.Chat.Android
 
-      - name: Apply patch
-        run: git apply patch/protector101_patch.diff
+      - name: Override configs manually
+        run: |
+          cp patch/strings.xml app/src/main/res/values/strings.xml
+          cp patch/colors.xml app/src/main/res/values/colors.xml
 
       - name: Copy resources
         run: |
