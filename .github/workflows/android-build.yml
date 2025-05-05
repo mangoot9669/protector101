@@ -59,14 +59,16 @@ jobs:
 
       - name: Replace Flexbox version dynamically
         run: |
+          # Заменяем старую версию flexbox на более актуальную (например, 3.0.0)
           sed -i 's/com.google.android:flexbox:1.1.0/com.google.android:flexbox:3.0.0/' app/build.gradle
 
       - name: Add repositories for dependencies
         run: |
+          # Добавляем необходимые репозитории
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ google()' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ google()' app/build.gradle  # Обязательно добавляем google()
 
       - name: Clean Gradle build cache
         run: ./gradlew cleanBuildCache
@@ -76,4 +78,4 @@ jobs:
 
       - name: Assemble Debug APK
         run: |
-          ./gradlew assembleDebug --stacktrace --info
+          ./gradlew assembleDebug --stacktrace --info  # Выводим подробную информацию для отладки
