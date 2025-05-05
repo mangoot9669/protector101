@@ -70,14 +70,12 @@ jobs:
           find . -type f \( -name "build.gradle" -o -name "settings.gradle" \) \
           -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
 
-      - name: 🧹 Remove all dependency types using libs.*
+      - name: 🔥 Remove all unresolved dependency variables (libs., libraries., and plain vars)
         run: |
           for type in implementation api compileOnly testImplementation androidTestImplementation debugImplementation releaseImplementation runtimeOnly; do
-            find . -type f -name "*.gradle" -exec sed -i "/$type\s\+libs\./d" {} +
+            find . -type f -name "*.gradle" -exec sed -i "/$type\s\+\(libs\|libraries\)\./d" {} +
           done
-
-      - name: 🔥 Remove unresolved implementation variables
-        run: |
+          # Also clean plain unresolved implementation variable refs
           find . -type f -name "*.gradle" -exec sed -i '/implementation\s\+[a-zA-Z_][a-zA-Z0-9_]*$/d' {} +
 
       - name: Clean Gradle build cache
