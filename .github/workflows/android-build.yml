@@ -29,8 +29,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Clone Kotlin SDK
-        run: |
-          git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
+        run: git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
 
       - name: Patch SDK to skip broken lint plugin
         run: |
@@ -41,10 +40,20 @@ jobs:
           sed -i '/org.jmailen.kotlinter/d' core/build.gradle || true
 
       - name: Clone Android Client
+        run: git clone https://github.com/RocketChat/Rocket.Chat.Android.git
+
+      - name: Copy app folder without breaking structure
+        run: cp -r Rocket.Chat.Android/app ./
+
+      - name: Patch settings.gradle with required modules
         run: |
-          git clone https://github.com/RocketChat/Rocket.Chat.Android.git
-          mv Rocket.Chat.Android/* .
-          rm -rf Rocket.Chat.Android
+          echo "include ':app', ':core', ':player', ':emoji', ':util', ':suggestions', ':draw'" > settings.gradle
+          echo "project(':core').projectDir = file('Rocket.Chat.Kotlin.SDK/core')" >> settings.gradle
+          echo "project(':player').projectDir = file('Rocket.Chat.Kotlin.SDK/player')" >> settings.gradle
+          echo "project(':emoji').projectDir = file('Rocket.Chat.Kotlin.SDK/emoji')" >> settings.gradle
+          echo "project(':util').projectDir = file('Rocket.Chat.Kotlin.SDK/util')" >> settings.gradle
+          echo "project(':suggestions').projectDir = file('Rocket.Chat.Kotlin.SDK/suggestions')" >> settings.gradle
+          echo "project(':draw').projectDir = file('Rocket.Chat.Kotlin.SDK/draw')" >> settings.gradle
 
       - name: Remove gradle-versions-plugin
         run: |
@@ -57,50 +66,33 @@ jobs:
           find . -type f -name "*.gradle" -exec sed -i '/jitsi-meet-sdk/d' {} +
           find . -type f -name "*.gradle" -exec sed -i '/jitpack.io/d' {} +
 
-      - name: Revert flexbox version to 1.1.0
+      - name: Patch flexbox and exoplayer
         run: |
-          find . -type f -name "*.gradle" -exec sed -i 's/com.google.android:flexbox:[0-9.]\+/com.google.android:flexbox:1.1.0/g' {} +
-
-      - name: Replace ExoPlayer version
-        run: |
-          find . -type f -name "*.gradle" -exec sed -i 's/com.google.android.exoplayer:exoplayer:[0-9.]\+/com.google.android.exoplayer:exoplayer:2.14.1/g' {} +
+          find . -type f -name "*.gradle" -exec sed -i 's/com.google.android:flexbox:[^"]\+/com.google.android:flexbox:1.1.0/g' {} +
+          find . -type f -name "*.gradle" -exec sed -i 's/com.google.android.exoplayer:exoplayer:[^"]\+/com.google.android.exoplayer:exoplayer:2.14.1/g' {} +
 
       - name: Ensure google() repository present
         run: |
-          find . -type f \( -name "build.gradle" -o -name "settings.gradle" \) \
-          -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
+          find . -type f \( -name "build.gradle" -o -name "settings.gradle" \) -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
 
-      - name: 🔥 Remove unresolved dependencies (libs., libraries., kapt)
+      - name: Remove unresolved kapt/libraries/implementation lines
         run: |
           for type in implementation api compileOnly testImplementation androidTestImplementation debugImplementation releaseImplementation runtimeOnly; do
             find . -type f -name "*.gradle" -exec sed -i "/$type\s\+\(libs\|libraries\)\./d" {} +
           done
-          find . -type f -name "*.gradle" -exec sed -i '/implementation\s*(libraries\./d' {} +
           find . -type f -name "*.gradle" -exec sed -i '/kapt\s\+libraries\./d' {} +
           find . -type f -name "*.gradle" -exec sed -i '/implementation\s\+[a-zA-Z_][a-zA-Z0-9_]*$/d' {} +
 
-      - name: 🧯 Disable crashing TODO("not implemented") placeholders
+      - name: Disable crashing TODO() in Kotlin
         run: |
           find . -type f -name "*.kt" -exec sed -i 's/TODO("not implemented")/\/\/ TODO("not implemented")/' {} +
 
-      - name: 🪵 Print dependencies block (debug)
-        run: |
-          echo "=== app/build.gradle dependencies section ==="
-          awk '/dependencies\s*\{/ {p=1} p; /\}/ {if (p) { print; p=0 }}' app/build.gradle || true
+      - name: Clean Gradle
+        run: ./gradlew cleanBuildCache clean || true
 
-      - name: Clean Gradle build cache
-        run: ./gradlew cleanBuildCache || true
-
-      - name: Clean project
-        run: ./gradlew clean || true
-
-      - name: Assemble Debug APK
+      - name: Build APK
         run: ./gradlew assembleDebug --stacktrace --info
 
-      - name: 🪵 Kotlin error scan (if failed)
-        if: failure()
-        run: |
-          echo "=== Kotlin compilation errors ==="
-          find . -type f -name "*.log" -exec tail -n 100 {} +
-          echo "=== Crashing TODOs in code ==="
-          find . -type f -name "*.kt" | xargs grep -n 'TODO("' || true
+      - name: Output APK files
+        if: success()
+        run: find . -type f -name "*.apk"
