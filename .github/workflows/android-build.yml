@@ -53,31 +53,28 @@ jobs:
 
       - name: Remove broken jitpack dependencies
         run: |
-          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i '/wang.avi/d' {} +
-          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i '/jitsi-meet-sdk/d' {} +
-          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i '/jitpack.io/d' {} +
+          find . -type f -name "*.gradle" -exec sed -i '/wang.avi/d' {} +
+          find . -type f -name "*.gradle" -exec sed -i '/jitsi-meet-sdk/d' {} +
+          find . -type f -name "*.gradle" -exec sed -i '/jitpack.io/d' {} +
 
       - name: Revert flexbox version to 1.1.0
         run: |
-          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i 's/com.google.android:flexbox:[0-9.]\+/com.google.android:flexbox:1.1.0/g' {} +
+          find . -type f -name "*.gradle" -exec sed -i 's/com.google.android:flexbox:[0-9.]\+/com.google.android:flexbox:1.1.0/g' {} +
 
       - name: Replace ExoPlayer version
         run: |
-          find . -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -exec sed -i 's/com.google.android.exoplayer:exoplayer:[0-9.]\+/com.google.android.exoplayer:exoplayer:2.14.1/g' {} +
+          find . -type f -name "*.gradle" -exec sed -i 's/com.google.android.exoplayer:exoplayer:[0-9.]\+/com.google.android.exoplayer:exoplayer:2.14.1/g' {} +
 
       - name: Ensure google() repository present
         run: |
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" -o -name "settings.gradle" -o -name "settings.gradle.kts" \) \
+          find . -type f \( -name "build.gradle" -o -name "settings.gradle" \) \
           -exec sed -i '/repositories {/a \ \ \ \ google()' {} +
 
-      - name: 🔍 List dependencies using libs.*
+      - name: 🧹 Remove all dependency types using libs.*
         run: |
-          echo "Showing dependencies like 'implementation libs.xxx':"
-          grep -rn 'implementation libs\.' . || true
-
-      - name: 🧹 Remove dependencies like implementation libs.*
-        run: |
-          find . -type f -name "*.gradle" -exec sed -i '/implementation\s\+libs\./d' {} +
+          for type in implementation api compileOnly testImplementation androidTestImplementation debugImplementation releaseImplementation runtimeOnly; do
+            find . -type f -name "*.gradle" -exec sed -i "/$type\s\+libs\./d" {} +
+          done
 
       - name: Clean Gradle build cache
         run: ./gradlew cleanBuildCache || true
