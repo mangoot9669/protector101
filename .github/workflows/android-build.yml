@@ -50,30 +50,24 @@ jobs:
         run: |
           sed -i '/com.github.ben-manes:gradle-versions-plugin/d' build.gradle
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
-
-      - name: Fix app/build.gradle
-        run: |
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
-          sed -i 's/android {/android {\n    compileSdkVersion 29/' app/build.gradle
 
       - name: Add JitPack to repositories
         run: |
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' build.gradle
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
 
-      - name: Remove problematic dependencies (via sed)
+      - name: Set compileSdkVersion 29 if missing
         run: |
-          sed -i '/flexbox.*1.1.0/d' app/build.gradle
-          sed -i '/livedata-ktx.*2.0.1/d' app/build.gradle
-          sed -i '/wang.avi.*2.1.3/d' app/build.gradle
-          sed -i '/glide-transformations.*4.0.0/d' app/build.gradle
-          sed -i '/photodraweeview.*1.1.0/d' app/build.gradle
+          sed -i 's/android {/android {\n    compileSdkVersion 29/' app/build.gradle
 
-      - name: Debug dependencies
+      - name: Remove problematic dependencies (via sed exact)
         run: |
-          echo "------ BEGIN DEPENDENCY LIST -------"
-          grep implementation app/build.gradle || true
-          echo "------ END DEPENDENCY LIST ---------"
+          sed -i 's|implementation "com.google.android:flexbox:1.1.0"||' app/build.gradle
+          sed -i 's|implementation "com.shopify:livedata-ktx:2.0.1"||' app/build.gradle
+          sed -i 's|implementation "com.wang.avi:library:2.1.3"||' app/build.gradle
+          sed -i 's|implementation "jp.wasabeef:glide-transformations:4.0.0"||' app/build.gradle
+          sed -i 's|implementation "me.relex:photodraweeview:1.1.0"||' app/build.gradle
 
       - name: Override configs manually
         run: |
@@ -84,6 +78,12 @@ jobs:
         run: |
           cp custom/* app/src/main/res/drawable/
           cp custom/ic_launcher.png app/src/main/res/mipmap-xxhdpi/
+
+      - name: Debug dependencies (optional)
+        run: |
+          echo "------ DEPENDENCIES IN APP/BUILD.GRADLE -------"
+          grep implementation app/build.gradle || true
+          echo "------------------------------------------------"
 
       - name: Assemble Debug APK
         run: ./gradlew assembleDebug
