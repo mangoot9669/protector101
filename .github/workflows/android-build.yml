@@ -76,7 +76,7 @@ jobs:
 
       - name: Remove unresolved dependency lines
         run: |
-          find . -type f -name "*.gradle" -exec sed -i -E '/implementation[ ]+(null|""|\$[a-zA-Z_]+)/d' {} +
+          find . -type f -name "*.gradle" -exec sed -i -E '/implementation[ ]+(null|\\"{2}|\$[a-zA-Z_]+)/d' {} +
 
       - name: Clean Gradle build cache
         run: ./gradlew cleanBuildCache || true
