@@ -1,4 +1,4 @@
-\name: Build Protector101 APK
+name: Build Protector101 APK
 
 on:
   push:
