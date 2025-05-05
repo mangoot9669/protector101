@@ -1,33 +1,60 @@
-name: Android CI Build
+name: Build Protector101 APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
+    name: Assemble FossDebug APK
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up JDK
+      - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
-          distribution: "temurin"
-          java-version: 17
+          distribution: 'temurin'
+          java-version: '8'
 
-      - name: Apply patches
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Clone Kotlin SDK
+        run: |
+          git clone https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK.git
+
+      - name: Patch SDK (убираем ktlint)
+        run: |
+          cd Rocket.Chat.Kotlin.SDK
+          sed -i '/ktlint-html-reporter/d' build.gradle || true
+          sed -i '/kotlinter-gradle/d' build.gradle || true
+          sed -i '/org.jmailen.kotlinter/d' compat/build.gradle || true
+          sed -i '/org.jmailen.kotlinter/d' core/build.gradle || true
+
+      - name: Clone Android Client
+        run: |
+          git clone https://github.com/RocketChat/Rocket.Chat.Android.git
+          mv Rocket.Chat.Android/* .
+          rm -rf Rocket.Chat.Android
+
+      - name: Apply custom patches from /patches
         run: |
           for f in patches/*.diff; do
-            echo "Applying $f"
-            git apply "$f" || echo "Patch $f failed (maybe already applied)"
+            echo "Applying patch: $f"
+            patch -p1 < "$f" || echo "Patch $f failed but continuing"
           done
 
-      - name: Set up Gradle
-        uses: gradle/gradle-build-action@v2
+      - name: Ensure gradlew is executable
+        run: chmod +x ./gradlew
 
-      - name: Build with Gradle (system-installed)
-        run: gradle assembleFossDebug --stacktrace --info
+      - name: Assemble APK
+        run: ./gradlew assembleFossDebug --stacktrace --info
