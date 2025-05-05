@@ -58,8 +58,8 @@ jobs:
       - name: Assemble Debug APK
         run: ./gradlew assembleDebug
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: Protector101-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+     # - name: Upload APK artifact
+      #  uses: actions/upload-artifact@v3
+       # with:
+        #  name: Protector101-debug-apk
+         # path: app/build/outputs/apk/debug/app-debug.apk
