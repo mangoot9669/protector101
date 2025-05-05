@@ -52,16 +52,17 @@ jobs:
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
 
-      - name: Add repositories and dependencies
+      - name: Replace ExoPlayer version dynamically
+        run: |
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
+          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
+
+      - name: Add extra repositories for dependencies
         run: |
           # Добавляем необходимые репозитории
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
-
-          # Обновляем версию ExoPlayer
-          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
-          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
 
       - name: Remove problematic libraries
         run: |
