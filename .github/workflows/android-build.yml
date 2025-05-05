@@ -52,26 +52,16 @@ jobs:
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
           sed -i '/apply plugin: "com.github.ben-manes.versions"/d' app/build.gradle
 
-      - name: Replace ExoPlayer version dynamically
+      - name: Replace all mentions of ExoPlayer 2.8.2 with 2.14.1
         run: |
-          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
-          sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
+          sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/g' **/build.gradle
 
-      - name: Add extra repositories for dependencies
+      - name: Add repositories for dependencies
         run: |
-          # Добавляем необходимые репозитории
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
-          sed -i '/repositories {/a \ \ \ \ google()' app/build.gradle  # Добавление репозитория Google
-
-      - name: Remove problematic libraries
-        run: |
-          sed -i '/libraries.flexbox/d' app/build.gradle
-          sed -i '/libraries.livedataKtx/d' app/build.gradle
-          sed -i '/libraries.glideTransformations/d' app/build.gradle
-          sed -i '/libraries.aVLoadingIndicatorView/d' app/build.gradle
-          sed -i '/libraries.frescoImageViewer/d' app/build.gradle
+          sed -i '/repositories {/a \ \ \ \ google()' app/build.gradle
 
       - name: Clean Gradle build cache
         run: ./gradlew cleanBuildCache
@@ -81,4 +71,4 @@ jobs:
 
       - name: Assemble Debug APK
         run: |
-          ./gradlew assembleDebug --stacktrace --info  # Выводим подробную информацию для отладки
+          ./gradlew assembleDebug --stacktrace --info
