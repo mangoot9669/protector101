@@ -1,0 +1,19 @@
+diff --git a/build.gradle b/build.gradle
+--- a/build.gradle
++++ b/build.gradle
+@@ -5,7 +5,6 @@
+     dependencies {
+         classpath "com.android.tools.build:gradle:..."
+-        classpath "com.github.ben-manes:gradle-versions-plugin:0.20.0"
+     }
+ }
+ 
+@@ -13,7 +12,6 @@
+ allprojects {
+     repositories {
+         google()
+         jcenter()
+     }
+ }
+-
+-apply plugin: "com.github.ben-manes.versions"

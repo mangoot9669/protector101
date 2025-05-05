@@ -46,6 +46,11 @@ jobs:
           mv Rocket.Chat.Android/* .
           rm -rf Rocket.Chat.Android
 
+      - name: Remove gradle-versions-plugin
+        run: |
+          sed -i '/com.github.ben-manes:gradle-versions-plugin/d' build.gradle
+          sed -i '/apply plugin: "com.github.ben-manes.versions"/d' build.gradle
+
       - name: Override configs manually
         run: |
           cp patch/strings.xml app/src/main/res/values/strings.xml
