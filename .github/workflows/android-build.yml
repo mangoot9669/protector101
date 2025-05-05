@@ -43,7 +43,7 @@ jobs:
       - name: Clone Android Client
         run: |
           git clone https://github.com/RocketChat/Rocket.Chat.Android.git
-          mv Rocket.Chat.Android/* .
+          mv Rocket.Chat.Android/* .  # Перемещаем содержимое в основной каталог
           rm -rf Rocket.Chat.Android
 
       - name: Remove gradle-versions-plugin
@@ -54,15 +54,13 @@ jobs:
 
       - name: Add repositories and dependencies
         run: |
-          # Add required repositories
+          # Добавляем необходимые репозитории
           sed -i '/repositories {/a \ \ \ \ maven { url "https://jitpack.io" }' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
           sed -i '/repositories {/a \ \ \ \ jcenter()' app/build.gradle
 
-          # Update exoplayer version
+          # Обновляем версию ExoPlayer
           sed -i 's/com.google.android.exoplayer:exoplayer:2.8.2/com.google.android.exoplayer:exoplayer:2.14.1/' app/build.gradle
-
-          # Ensure exoplayer is correctly added
           sed -i 's/com.google.android.exoplayer:exoplayer/implementation "com.google.android.exoplayer:exoplayer:2.14.1"/' app/build.gradle
 
       - name: Remove problematic libraries
@@ -74,4 +72,6 @@ jobs:
           sed -i '/libraries.frescoImageViewer/d' app/build.gradle
 
       - name: Assemble Debug APK
-        run: ./gradlew assembleDebug
+        run: |
+          ./gradlew clean  # Очистим проект перед сборкой
+          ./gradlew assembleDebug --stacktrace --info  # Выводим подробную информацию для отладки
