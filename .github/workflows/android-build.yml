@@ -92,3 +92,11 @@ jobs:
 
       - name: Assemble Debug APK
         run: ./gradlew assembleDebug --stacktrace --info
+
+      - name: 🪵 Kotlin compilation errors (if failed)
+        if: failure()
+        run: |
+          echo "=== Kotlin compilation errors (log tail) ==="
+          find . -type f -name "*.log" -exec tail -n 100 {} +
+          echo "=== TODOs in code (may crash build) ==="
+          find . -type f -name "*.kt" | xargs grep -ni "TODO" || true
